@@ -1,0 +1,208 @@
+<!-- Wildany's Website -->
+<!-- This is a project I'm coding up for Wildany Guerrero to showcase his work -->
+<!-- Implemented by Billy -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Guerrero</title>
+
+  <meta charset='utf-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1'>
+
+  <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css' integrity='sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ' crossorigin='anonymous'>
+  <link rel='stylesheet' href='css/layout.css'>
+
+  <script src='https://code.jquery.com/jquery-3.1.1.slim.min.js' integrity='sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n' crossorigin='anonymous'></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js' integrity='sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb' crossorigin='anonymous'></script>
+  <!-- <script src='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js' integrity='sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn' crossorigin='anonymous'></script> -->
+  <script>
+    var MENU_ITEMS = ['#show-politics', '#show-music', '#show-fashion'];
+    var BODY_ITEMS = ['.politics-item', '.music-item', '.fashion-item'];
+
+    $(window).resize(function() {
+       adjustDimensions();
+     });
+    $(document).ready(function() {
+      adjustDimensions();
+      loadPage();
+    });
+    $(document).on('click', '.menuItem', function(evt){
+      var item = $(this).attr('id').replace('show-','');
+      loadItemCards(item);
+    });
+    $(document).on('click', '#logo', function(evt){
+      loadAllCards();
+    });
+
+    // Ran into issues where the dynamic width of container was
+    // messing with dimensions and spacing of header and cards.
+    // *slighltly* hacky fix:
+    function adjustDimensions() {
+      adjustNavWidth();
+      adjustTopMargin();
+    }
+    function adjustNavWidth() {
+      var parentwidth = $('.container').width();
+      $('.navigation').width(parentwidth);
+    }
+    function adjustTopMargin() {
+      var navHeight = $('#header').height()+'px';
+      $('.mainBody').css({'margin-top':navHeight});
+    }
+    // Load page according the current url
+    function loadPage() {
+      var url = window.location.href.split('/');
+      var location = url[url.length-1];
+      switch(location) {
+        case('politics'):
+        case('music'):
+        case('fashion'):
+          loadItemCards(location);
+          break
+        default:
+          loadAllCards();
+      }
+    }
+    function loadItemCards(item) {
+      var menuItemId = 'show-' + item;
+      var menuItem = $('#' + menuItemId);
+      // if this item is already selected, do nothing
+      if(menuItem.hasClass('selectedMenuItem')){
+        return;
+      }
+      // unselect the current selected item
+      for(var i in MENU_ITEMS){
+        $(MENU_ITEMS[i]).removeClass('selectedMenuItem');
+        $(MENU_ITEMS[i]).addClass('nav_hover');
+      }
+      // select the new one
+      menuItem.removeClass('nav_hover');
+      menuItem.addClass('selectedMenuItem');
+      // hide all items
+      for(var i in BODY_ITEMS){
+        $(BODY_ITEMS[i]).hide();
+      }
+      // show items from selected option
+      var showItems = item+'-item';
+      $('.'+showItems).show();
+    }
+    function loadAllCards() {
+      // unselect current selected item if one exists
+      for(var i in MENU_ITEMS){
+        $(MENU_ITEMS[i]).removeClass('selectedMenuItem');
+        $(MENU_ITEMS[i]).addClass('nav_hover');
+      }
+      // show all items in case some were hidden
+      for(var i in BODY_ITEMS){
+        $(BODY_ITEMS[i]).show();
+      }
+    }
+  </script>
+</head>
+<body>
+<div class='container'>
+  <div class='noselect' id='header'>
+    <div id='logo'>
+      <h1><a href="#">Guerrero</a></h1>
+    </div>
+    <div class='navigation'>
+      <a href='#/politics' class='menuItem nav_hover' id='show-politics'>Politics</a>
+      <a href='#/music' class='menuItem nav_hover' id='show-music'>Music</a>
+      <a href='#/fashion' class='menuItem nav_hover' id='show-fashion'>Fashion</a>
+    </div>
+  </div>
+
+  <div class='mainBody'>
+    <div class='card-columns'>
+
+      <div class='card music-item'>
+        <img class='card-img-top img-fluid' src='https://upload.wikimedia.org/wikipedia/commons/c/c7/444_album_cover.png' alt='Image'>
+        <div class='card-block'>
+          <h4 class='card-title'>
+            <a href='#' class='card-link'>
+              My Review of 4:44
+            </a>
+          </h4>
+          <p class='card-text'>Allow me to reintroduce my self, my name is ...</p>
+          <p class='card-text'><small class='text-muted'>
+            <cite title='Source Title'>Original Content</cite>
+            <br>
+            8/4/17 4:44pm
+          </small></p>
+        </div>
+      </div>
+
+      <div class='card fashion-item'>
+        <img class='card-img-top img-fluid' src='https://pbs.twimg.com/profile_images/888189972595044353/-9vyTOts_400x400.jpg' alt='Image'>
+        <div class='card-block'>
+          <h4 class='card-title'>
+            <a href='#' class='card-link'>
+              This is my Fashion Piece
+            </a>
+          </h4>
+          <p class='card-text'>Short snippet from the beginning of your article text ...</p>
+          <p class='card-text'><small class='text-muted'>
+            <cite title='Source Title'>Original Content</cite>
+            <br>
+            8/1/17 5:21pm
+          </small></p>
+        </div>
+      </div>
+
+      <div class='card music-item'>
+        <img class='card-img-top img-fluid' src='https://upload.wikimedia.org/wikipedia/en/d/dc/Damn._Kendrick_Lamar.jpg' alt='Image'>
+        <div class='card-block'>
+          <p class='card-text'><small class='text-muted'>
+            <cite title='Source Title'>Original Content</cite>
+            <br>
+            6/10/17 1:28pm
+          </small></p>
+        </div>
+      </div>
+
+      <div class='card politics-item'>
+        <img class='card-img-top img-fluid' src='https://s3.amazonaws.com/media.awd.ame/597_donald_trump_with_neil_gorsuch_013117p.jpg' alt='Trump and Neil Gorsuch'>
+        <div class='card-block'>
+          <h4 class='card-title'>
+            <a href='http://www.amwordmag.com/article/2017/04/neil-gorsuch-supreme-court-op-ed' class='card-link' target='_blank'>
+              Justice Gorsuch: Why His Big Moment Was a Waste of Time
+            </a>
+          </h4>
+          <p class='card-text'>The Supreme Court formally added its 113th Justice in United States history earlier this month after a month-long political battle in the Senate that ...</p>
+          <p class='card-text'><small class='text-muted'>
+            Published on <cite title='Source Title'>American Word</cite>
+            <br>
+            4/21/17 12:43pm
+          </small></p>
+        </div>
+      </div>
+
+      <div class='card politics-item'>
+        <img class='card-img-top img-fluid' src='https://s3.amazonaws.com/media.awd.ame/398_option_3p.jpg' alt='John Yarmuth'>
+        <div class='card-block'>
+          <h4 class='card-title'>
+            <a href='http://www.amwordmag.com/article/2016/04/congressman-john-yarmuth' class='card-link' target='_blank'>
+              Congressman John Yarmuth’s Democratic Antidote for Congress’ Republican Virus
+            </a>
+          </h4>
+          <p class='card-text'>“I switched parties in 1985. It was a great catharsis for me. I felt better immediately. I felt like I had been decontaminated,” said Congressman ...</p>
+          <p class='card-text'><small class='text-muted'>
+            Published on <cite title='Source Title'>American Word</cite>
+            <br>
+            4/4/16 4:42pm
+          </small></p>
+        </div>
+      </div>
+    </div>
+
+    <footer id='footer'>
+      <small class='text-muted'><p>
+        Contact me: <a href="mailto:wilguerrero1@gmail.com?Subject=Hi%20Wildany" target="_top">wilguerrero1@gmail.com</a>
+        <br>
+        Contact my coder: <a href="mailto:billyt@mit.edu?Subject=Hi%20Billy" target="_top">billyt@mit.edu</a>
+      </small></p>
+    </footer>
+  </div>
+</div>
+</body>
+</html>

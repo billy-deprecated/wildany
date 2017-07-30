@@ -1,0 +1,95 @@
+body {
+  background-color: #f1f0f0;
+}
+
+#logo {
+  text-align: center;
+  color: blue;
+  background-color: #f1f0f0;
+  padding: 5px;
+  font-family: monospace;
+  font-variant: small-caps;
+}
+
+#logo a {
+  color: blue;
+  text-decoration: none;
+}
+
+#header {
+  position: fixed;
+  top: 0;
+  z-index: 9999;
+}
+
+.navigation {
+  overflow: hidden;
+  background-color: white;
+  border-radius: 5px;
+  border-bottom: 1px solid #f1f0f0;
+  margin-bottom: 15px;
+  margin-top: -3px;
+  font-variant: small-caps;
+}
+
+.navigation a {
+  float: left;
+  display: block;
+  color: #656060;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+.nav_hover:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+.selectedMenuItem {
+  color: white ! important;
+  background-color: #2d97af;
+}
+
+.mainBody {
+  margin-top: 115px;
+}
+
+.card-title{
+  font-family: monospace;
+}
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
+}
+
+@media (min-width: 576px) {
+  .card-columns {
+    column-count: 2;
+  }
+}
+
+@media (min-width: 768px) {
+  .card-columns {
+    column-count: 3;
+  }
+}
+
+@media (min-width: 992px) {
+  .card-columns {
+    column-count: 4;
+  }
+}
+
+@media (min-width: 1200px) {
+  .card-columns {
+    column-count: 5;
+  }
+}
