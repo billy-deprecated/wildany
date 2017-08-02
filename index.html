@@ -12,26 +12,29 @@
   <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css' integrity='sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ' crossorigin='anonymous'>
   <link rel='stylesheet' href='css/layout.css'>
 
-  <script src='https://code.jquery.com/jquery-3.1.1.slim.min.js' integrity='sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n' crossorigin='anonymous'></script>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"> </script>
+  <script src='https://code.jquery.com/jquery-3.1.1.min.js' crossorigin='anonymous'></script>
   <script src='https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js' integrity='sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb' crossorigin='anonymous'></script>
-  <!-- <script src='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js' integrity='sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn' crossorigin='anonymous'></script> -->
+  <script src='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js' integrity='sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn' crossorigin='anonymous'></script>
   <script>
     var MENU_ITEMS = ['#show-politics', '#show-music', '#show-fashion'];
     var BODY_ITEMS = ['.politics-item', '.music-item', '.fashion-item'];
-
-    $(window).resize(function() {
-       adjustDimensions();
-     });
+    // NOTE: a lot of the work below is not scalable, and doesn't follow
+    // good design conventions. This was done quickly to get the site up as
+    // soon as possible; we'll continually improve this hacky construction.
+    $(window).resize(adjustDimensions);
     $(document).ready(function() {
       adjustDimensions();
-      loadPage();
+      renderPage();
     });
     $(document).on('click', '.menuItem', function(evt){
-      var item = $(this).attr('id').replace('show-','');
-      loadItemCards(item);
+      location.reload();
     });
     $(document).on('click', '#logo', function(evt){
-      loadAllCards();
+      location.reload();
+    });
+    $(document).on('click', '.card-title', function(evt){
+      location.reload();
     });
 
     // Ran into issues where the dynamic width of container was
@@ -49,28 +52,60 @@
       var navHeight = $('#header').height()+'px';
       $('.mainBody').css({'margin-top':navHeight});
     }
+    // Read json file and display cards
+    function renderPage() {
+      var currentTab = getCurrentTab();
+      var isArticle = !isNaN(currentTab) && currentTab != 0
+      $('.articleBody').empty();
+      $('.card-columns').empty();
+      $.getJSON('articles.json',{
+          format: "json"
+        }).done(function(data) {
+          $.each(data.articles, function(i, article) {
+            if(isArticle) {
+              if(article.id == currentTab) {
+                $('.articleBody').show();
+                $('.articleBody').empty();
+                $('.articleBody').append(createArticle(article));
+                return 0;
+              }
+            } else {
+              $('.card-columns').append(createCard(article));
+            }
+          });
+        });
+      // timeout to make sure cards are appended
+      if(!isArticle){
+        setTimeout(loadPage, 10);
+      }
+    }
     // Load page according the current url
     function loadPage() {
+      var location = getCurrentTab();
+      isTabSelected(location) ?
+        loadItemCards(location) :
+        loadAllCards();
+    }
+    function getCurrentTab() {
       var url = window.location.href.split('/');
-      var location = url[url.length-1];
+      return url[url.length-1];
+    }
+    function isTabSelected(location) {
       switch(location) {
         case('politics'):
         case('music'):
         case('fashion'):
-          loadItemCards(location);
-          break
+          return true;
         default:
-          loadAllCards();
+          return false;
       }
     }
     function loadItemCards(item) {
+      $('.articleBody').hide();
+      $('.card-columns').show();
       var menuItemId = 'show-' + item;
       var menuItem = $('#' + menuItemId);
-      // if this item is already selected, do nothing
-      if(menuItem.hasClass('selectedMenuItem')){
-        return;
-      }
-      // unselect the current selected item
+      // unselect the current selected item in case it's different
       for(var i in MENU_ITEMS){
         $(MENU_ITEMS[i]).removeClass('selectedMenuItem');
         $(MENU_ITEMS[i]).addClass('nav_hover');
@@ -87,6 +122,8 @@
       $('.'+showItems).show();
     }
     function loadAllCards() {
+      $('.articleBody').hide();
+      $('.card-columns').show();
       // unselect current selected item if one exists
       for(var i in MENU_ITEMS){
         $(MENU_ITEMS[i]).removeClass('selectedMenuItem');
@@ -96,6 +133,36 @@
       for(var i in BODY_ITEMS){
         $(BODY_ITEMS[i]).show();
       }
+    }
+    function loadArticle(id) {
+      $('.card-columns').hide();
+    }
+    function createArticle(article) {
+      var title = "<h1> " + article.title + "</h1>";
+      var img = "<figure><img src='" + article.img + "'>";
+      var caption = "<figcaption>" + article.caption + "</figcaption></figure>"
+      var body = "<div class='article-paragraphs'> " + article.fullText + "</div>";
+      var footer = "<figcaption>Uploaded on " + article.date + " " + article.time + "</figcaption>"
+      var post = title + img + caption + body + footer;
+      return post;
+    }
+    function createCard(article) {
+      var header = "<div class='card " + article.type + "-item'>";
+      article.img ?
+        img = "<img class='card-img-top img-fluid' src='"+article.img+"'>" :
+        img = "";
+      var block = "<div class='card-block'>"
+      var title = "<h4 class='card-title'><a href='"+ article.link + "' class='card-link'";
+      article.publisher ? title += " target='_blank'>" : title += ">";
+      title += article.title + "</a></h4>";
+      var snippet = "<p class='card-text'>" + article.snippet +"</p>";
+      var footer = "<p class='card-text'><small class='text-muted'>";
+      article.publisher ?
+        footer += "Published on <cite title='Source Title'>" + article.publisher :
+        footer += "Original Content";
+      footer += "</cite><br>" + article.date + " " + article.time + "</small></p></div></div>";
+      var card = header + img + block + title + snippet + footer;
+      return card;
     }
   </script>
 </head>
@@ -114,85 +181,9 @@
 
   <div class='mainBody'>
     <div class='card-columns'>
+    </div>
 
-      <div class='card music-item'>
-        <img class='card-img-top img-fluid' src='https://upload.wikimedia.org/wikipedia/commons/c/c7/444_album_cover.png' alt='Image'>
-        <div class='card-block'>
-          <h4 class='card-title'>
-            <a href='#' class='card-link'>
-              My Review of 4:44
-            </a>
-          </h4>
-          <p class='card-text'>Allow me to reintroduce my self, my name is ...</p>
-          <p class='card-text'><small class='text-muted'>
-            <cite title='Source Title'>Original Content</cite>
-            <br>
-            8/4/17 4:44pm
-          </small></p>
-        </div>
-      </div>
-
-      <div class='card fashion-item'>
-        <img class='card-img-top img-fluid' src='https://pbs.twimg.com/profile_images/888189972595044353/-9vyTOts_400x400.jpg' alt='Image'>
-        <div class='card-block'>
-          <h4 class='card-title'>
-            <a href='#' class='card-link'>
-              This is my Fashion Piece
-            </a>
-          </h4>
-          <p class='card-text'>Short snippet from the beginning of your article text ...</p>
-          <p class='card-text'><small class='text-muted'>
-            <cite title='Source Title'>Original Content</cite>
-            <br>
-            8/1/17 5:21pm
-          </small></p>
-        </div>
-      </div>
-
-      <div class='card music-item'>
-        <img class='card-img-top img-fluid' src='https://upload.wikimedia.org/wikipedia/en/d/dc/Damn._Kendrick_Lamar.jpg' alt='Image'>
-        <div class='card-block'>
-          <p class='card-text'><small class='text-muted'>
-            <cite title='Source Title'>Original Content</cite>
-            <br>
-            6/10/17 1:28pm
-          </small></p>
-        </div>
-      </div>
-
-      <div class='card politics-item'>
-        <img class='card-img-top img-fluid' src='https://s3.amazonaws.com/media.awd.ame/597_donald_trump_with_neil_gorsuch_013117p.jpg' alt='Trump and Neil Gorsuch'>
-        <div class='card-block'>
-          <h4 class='card-title'>
-            <a href='http://www.amwordmag.com/article/2017/04/neil-gorsuch-supreme-court-op-ed' class='card-link' target='_blank'>
-              Justice Gorsuch: Why His Big Moment Was a Waste of Time
-            </a>
-          </h4>
-          <p class='card-text'>The Supreme Court formally added its 113th Justice in United States history earlier this month after a month-long political battle in the Senate that ...</p>
-          <p class='card-text'><small class='text-muted'>
-            Published on <cite title='Source Title'>American Word</cite>
-            <br>
-            4/21/17 12:43pm
-          </small></p>
-        </div>
-      </div>
-
-      <div class='card politics-item'>
-        <img class='card-img-top img-fluid' src='https://s3.amazonaws.com/media.awd.ame/398_option_3p.jpg' alt='John Yarmuth'>
-        <div class='card-block'>
-          <h4 class='card-title'>
-            <a href='http://www.amwordmag.com/article/2016/04/congressman-john-yarmuth' class='card-link' target='_blank'>
-              Congressman John Yarmuth’s Democratic Antidote for Congress’ Republican Virus
-            </a>
-          </h4>
-          <p class='card-text'>“I switched parties in 1985. It was a great catharsis for me. I felt better immediately. I felt like I had been decontaminated,” said Congressman ...</p>
-          <p class='card-text'><small class='text-muted'>
-            Published on <cite title='Source Title'>American Word</cite>
-            <br>
-            4/4/16 4:42pm
-          </small></p>
-        </div>
-      </div>
+    <div class='articleBody'>
     </div>
 
     <footer id='footer'>
